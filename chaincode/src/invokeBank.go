@@ -3,7 +3,6 @@ package main
 import (
     "fmt"
     "encoding/json"
-    //"strings"
     "strconv"
     "github.com/hyperledger/fabric/core/chaincode/shim"
     pb "github.com/hyperledger/fabric/protos/peer"
@@ -24,7 +23,7 @@ func initBank(stub shim.ChaincodeStubInterface) pb.Response {
     
     for i := 0; i < len(_bankMaster); i++ {
 
-        // PREPARE THE KEY VALUE PAIR TO PERSIST THE INVESTOR
+        // PREPARE THE KEY VALUE PAIR TO PERSIST THE BANK MASTER DATA
         _bankKey, err := stub.CreateCompositeKey(PREFIX04IDX, []string {PREFIX04, _bankMaster[i].UserName})
         // CHECK FOR ERROR IN CREATING COMPOSITE KEY
         if err != nil {
@@ -105,8 +104,8 @@ func getBankMaster(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 // USES PREFIX04, PREFIX04IDX FOR COMPOSITE KEY - BANK MASTER
 // USES PREFIX05, PREFIX05IDX FOR COMPOSITE KEY - BANK TRANSACTIONS
 func executeTransaction(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-    fmt.Println("************************************************")
-    fmt.Println("---------- IN EXECUTE TRANSACTION BANK----------")
+    fmt.Println("*************************************************")
+    fmt.Println("---------- IN EXECUTE TRANSACTION BANK ----------")
 
     // RETURN ERROR IF ARGS IS NOT 4 IN NUMBER
     if len(args) != 4 {
@@ -153,6 +152,7 @@ func executeTransaction(stub shim.ChaincodeStubInterface, args []string) pb.Resp
     }
 
     // READY TO EXECUTE TRANSACTION
+    // TRANSACTION EXECUTES ONLY IF ENOUGH BALANCE IS AVAILABLE IN ACCOUNT
     _balance := _bankMaster.Balance
     if _transactionType == DEBIT {
         if (_balance < _amount) {
@@ -224,8 +224,8 @@ func executeTransaction(stub shim.ChaincodeStubInterface, args []string) pb.Resp
     }
     fmt.Println("executeTransaction: Writing Bank Transaction Completed")
 
-    fmt.Println("---------- OUT EXECUTE TRANSACTION BANK----------")
-    fmt.Println("*************************************************")
+    fmt.Println("---------- OUT EXECUTE TRANSACTION BANK ----------")
+    fmt.Println("**************************************************")
 
     // RETURN SUCCESS
     return shim.Success(_bankTransactionAsBytes)

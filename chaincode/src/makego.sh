@@ -11,5 +11,8 @@ if [ -f "$mainfile" ]; then
 fi
 
 # now build the go modules
-go build main.go data.go invokeCustodian.go invokeBank.go
-ls -l main
+go build main.go data.go invokeCustodian.go invokeBank.go invokeExchange.go
+
+if [ -f "$mainfile" ]; then
+    ls -l main
+fi

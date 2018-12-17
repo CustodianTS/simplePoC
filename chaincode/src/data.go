@@ -17,8 +17,8 @@ type investor struct {
 type investorPortfolio struct {
     StockTicker string  `json:"stock_ticker"`
     StockQty    int64   `json:"stock_qty"`
-    StockPrice  float32 `json:"stock_price"`
-    StockValue  float32 `json:"stock_value"`
+    StockPrice  float64 `json:"stock_price"`
+    StockValue  float64 `json:"stock_value"`
 }
 
 // Key consists of 03 + UserName
@@ -27,8 +27,8 @@ type investorTrades struct {
     TradeType      string    `json:"trade_type"`
     StockTicker    string    `json:"stock_ticker"`
     StockQty       int64     `json:"stock_qty"`
-    StockPrice     float32   `json:"stock_price"`
-    StockValue     float32   `json:"stock_value"`
+    StockPrice     float64   `json:"stock_price"`
+    StockValue     float64   `json:"stock_value"`
 }
 
 // DATA STRUCTURE TO CAPTURE TRANSACTION DETAILS BY BANK
@@ -48,13 +48,13 @@ type bankTransactions struct {
 }
 
 // DATA STRUCTURE TO CAPTURE TRADING DETAILS BY EXCHANGE
-// Key consists of 06 only
+// Key consists of 06 + StockTicker
 type exchangeMaster struct {
     StockTicker string    `json:"stock_ticker"`
     StockQty    int64     `json:"stock_qty"`
-    StockPrice  float32   `json:"stock_price"`
+    StockPrice  float64   `json:"stock_price"`
 }
-// Key consists of 07 only
+// Key consists of 07 + UserName
 type exchangeTrades struct {
     UserName       string    `json:"user_name"`
     TradeTimestamp string    `json:"trade_timestamp"`

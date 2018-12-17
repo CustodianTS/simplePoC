@@ -7,7 +7,7 @@
 
 SLEEPY=5
 CHNAME=tradingchannel
-CCNAME=simple4
+CCNAME=simple7
 
 # STOP all the containers
 if [ `sudo docker ps | grep "regulator" | wc -l` != 0 ]; then
@@ -103,4 +103,3 @@ sudo docker exec -e "CORE_PEER_LOCALMSPID=BankMSP" -e "CORE_PEER_MSPCONFIGPATH=/
 
 # Instantiate chain code
 sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/investor.example.com/users/Admin@investor.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.investor.example.com:7051" cli peer chaincode instantiate -o orderer.example.com:7050 -C $CHNAME -n $CCNAME -l golang -v 1.0 -c '{"Args":[""]}' -P "OR ('InvestorMSP.member','CustodianMSP.member','ExchangeMSP.member','BankMSP.member')"
-

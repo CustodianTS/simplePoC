@@ -12,16 +12,16 @@ const PREFIX01 = "01" // For investor
 //const PREFIX03 = "03" // For investorTrades
 const PREFIX04 = "04" // For bankMaster
 const PREFIX05 = "05" // For bankTransactions
-//const PREFIX06 = "06" // For exchangeMaster
-//const PREFIX07 = "07" // For exchangeTrades
+const PREFIX06 = "06" // For exchangeMaster
+const PREFIX07 = "07" // For exchangeTrades
 
 const PREFIX01IDX = "01IDX" // Index for investor
 //const PREFIX02IDX = "02IDX" // Index for investorPortfolio
 //const PREFIX03IDX = "03IDX" // Index for investorTrades
 const PREFIX04IDX = "04IDX" // Index for bankMaster
 const PREFIX05IDX = "05IDX" // Index for bankTransactions
-//const PREFIX06IDX = "06IDX" // Index for exchangeMaster
-//const PREFIX07IDX = "07IDX" // Index for exchangeTrades
+const PREFIX06IDX = "06IDX" // Index for exchangeMaster
+const PREFIX07IDX = "07IDX" // Index for exchangeTrades
 
 const DEBIT = "DEBIT"
 const CREDIT = "CREDIT"
@@ -52,8 +52,8 @@ var bcFunctions = map[string] func(shim.ChaincodeStubInterface, []string) pb.Res
     //"get_bank_transactions": getBankTransactions,
 
     // EXCHANGE PEER
-    //"get_exchange_master": getExchangeMaster,
-    //"execute_trade":       executeTrade,
+    "get_exchange_master": getExchangeMaster,
+    "execute_trade":       executeTrade,
     //"get_exchange_trades": getExchangeTrades,
 }
 
@@ -64,7 +64,7 @@ func (t *SmartContract) Init(stub shim.ChaincodeStubInterface) pb.Response {
     fmt.Println("**********************************")
     fmt.Println("----------IN INIT METHOD----------")
     initBank(stub)
-    //initExchange(stub)
+    initExchange(stub)
     fmt.Println("----------OUT INIT METHOD----------")
     fmt.Println("***********************************")
     return shim.Success(nil)
