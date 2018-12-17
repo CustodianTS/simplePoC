@@ -17,9 +17,9 @@ func initBank(stub shim.ChaincodeStubInterface) pb.Response {
 
     // INITIALIZE BANK MASTER WITH DATA
     _bankMaster := [] bankMaster {
-                      bankMaster {UserName: "johndoe01", BankAC: "BANK00001", Balance:100000},
-                      bankMaster {UserName: "johndoe02", BankAC: "BANK00002", Balance:200000},
-                      bankMaster {UserName: "johndoe03", BankAC: "BANK00003", Balance:300000},
+                      bankMaster {UserName: "johndoe01", BankAC: "BANK00001", Balance:100000.00},
+                      bankMaster {UserName: "johndoe02", BankAC: "BANK00002", Balance:200000.00},
+                      bankMaster {UserName: "johndoe03", BankAC: "BANK00003", Balance:300000.00},
                     }
     
     for i := 0; i < len(_bankMaster); i++ {
@@ -30,6 +30,7 @@ func initBank(stub shim.ChaincodeStubInterface) pb.Response {
         if err != nil {
             return shim.Error(err.Error())
         }
+        fmt.Println("Bank Key: ", _bankKey)
 
         // MARSHAL THE BANK MASTER RECORD 
         _bankMasterAsBytes, err := json.Marshal(_bankMaster[i])
@@ -37,13 +38,14 @@ func initBank(stub shim.ChaincodeStubInterface) pb.Response {
         if err != nil {
             return shim.Error(err.Error())
         }
+        fmt.Println("Bank Master Record: ", string(_bankMasterAsBytes))
 
         // NOW WRITE THE BANK MASTER RECORD
         err = stub.PutState(_bankKey, _bankMasterAsBytes)
         // CHECK FOR ERROR
         if err != nil {
             return shim.Error(err.Error())
-        }
+        }        
     }
     fmt.Println("---------- OUT INIT BANK ----------")
 
@@ -81,6 +83,7 @@ func getBankMaster(stub shim.ChaincodeStubInterface, args []string) pb.Response 
         return shim.Error(err.Error())
     }
     fmt.Println("getBankMaster: Arguments Setting and Prepare Key Completed")
+    fmt.Println("Bank Key: ", _bankKey)
 
     // USE THE KEY TO RETRIEVE BANK MASTER
     _bankMasterAsBytes, err := stub.GetState(_bankKey)
@@ -89,7 +92,7 @@ func getBankMaster(stub shim.ChaincodeStubInterface, args []string) pb.Response 
     }
     fmt.Println("getBankMaster: Record Retrieved by GetState")
 
-    fmt.Println(_bankMasterAsBytes)
+    fmt.Println(string(_bankMasterAsBytes))
     fmt.Println("---------- OUT GET BANK MASTER ----------")
     fmt.Println("*****************************************")
 
@@ -117,7 +120,7 @@ func executeTransaction(stub shim.ChaincodeStubInterface, args []string) pb.Resp
     _userName := args[0]
     _bankAC := args[1]
     _transactionType := args[2]
-    _amount, _ := strconv.ParseFloat(args[4], 64)
+    _amount, _ := strconv.ParseFloat(args[3], 64)
 
     // LOG THE ARGUMENTS
     fmt.Println("**** Arguments To Function ****")
@@ -133,6 +136,7 @@ func executeTransaction(stub shim.ChaincodeStubInterface, args []string) pb.Resp
         return shim.Error(err.Error())
     }
     fmt.Println("executeTransaction: Arguments Setting and Prepare Key Completed")
+    fmt.Println("Bank Key: ", _bankKey)
 
     // USE THE KEY TO RETRIEVE BANK MASTER
     _bankMasterAsBytes, err := stub.GetState(_bankKey)
@@ -140,7 +144,7 @@ func executeTransaction(stub shim.ChaincodeStubInterface, args []string) pb.Resp
         return shim.Error(err.Error())
     }
     fmt.Println("executeTransaction: Record Retrieved by GetState")
-    fmt.Println(_bankMasterAsBytes)
+    fmt.Println(string(_bankMasterAsBytes))
 
     _bankMaster := bankMaster{}
     err = json.Unmarshal(_bankMasterAsBytes, &_bankMaster)

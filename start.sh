@@ -7,7 +7,7 @@
 
 SLEEPY=5
 CHNAME=tradingchannel
-CCNAME=simple1
+CCNAME=simple4
 
 # STOP all the containers
 if [ `sudo docker ps | grep "regulator" | wc -l` != 0 ]; then
@@ -56,7 +56,7 @@ sleep $SLEEPY
 #sleep $SLEEPY
 
 # Create the channel
-sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/investor.example.com/users/Admin@investor.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.investor.example.com:7051" cli peer channel create -o orderer.example.com:7050 -c tradingchannel -f /etc/hyperledger/configtx/channel.tx
+sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/investor.example.com/users/Admin@investor.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.investor.example.com:7051" cli peer channel create -o orderer.example.com:7050 -c $CHNAME -f /etc/hyperledger/configtx/channel.tx
 sleep $SLEEPY
 
 # Join peer0.investor.example.com to the channel.
@@ -102,5 +102,5 @@ sudo docker exec -e "CORE_PEER_LOCALMSPID=BankMSP" -e "CORE_PEER_MSPCONFIGPATH=/
 #sudo docker exec -e "CORE_PEER_LOCALMSPID=RegulatorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/regulator.example.com/users/Admin@regulator.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.regulator.example.com:7051" cli peer chaincode install -n $CCNAME -v 1.0 -p github.com -l golang
 
 # Instantiate chain code
-sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/investor.example.com/users/Admin@investor.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.investor.example.com:7051" cli peer chaincode instantiate -o orderer.example.com:7050 -C tradingchannel -n $CCNAME -l golang -v 1.0 -c '{"Args":[""]}' -P "OR ('InvestorMSP.member','CustodianMSP.member','ExchangeMSP.member','BankMSP.member')"
+sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/investor.example.com/users/Admin@investor.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.investor.example.com:7051" cli peer chaincode instantiate -o orderer.example.com:7050 -C $CHNAME -n $CCNAME -l golang -v 1.0 -c '{"Args":[""]}' -P "OR ('InvestorMSP.member','CustodianMSP.member','ExchangeMSP.member','BankMSP.member')"
 
