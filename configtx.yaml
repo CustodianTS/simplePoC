@@ -1,0 +1,160 @@
+################################################################################
+# Define organzation MSP & channels required by the Custodian Asset usecase.
+# Organization MSPs - 6
+# Orderer - 1
+################################################################################
+Profiles:
+
+    OrdererGenesis:
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *OrdererOrg
+        Consortiums:
+            SampleConsortium:
+                Organizations:
+                    - *Investor
+                    - *Custodian
+                    - *Exchange
+                    - *Bank
+                    - *Depository
+                    - *Regulator
+    OrgChannel:
+        Consortium: SampleConsortium
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Investor
+                - *Custodian
+                - *Exchange
+                - *Bank
+                - *Depository
+                - *Regulator
+
+################################################################################
+#
+#   Section: Organizations
+#
+#   - This section defines the different organizational identities which will
+#   be referenced later in the configuration.
+#
+################################################################################
+Organizations:
+
+    # Orderer definition
+    - &OrdererOrg
+        Name: OrdererOrg
+        ID: OrdererMSP
+        MSPDir: crypto-config/ordererOrganizations/example.com/msp
+
+    # Investor definition
+    - &Investor
+        Name: InvestorMSP
+        ID: InvestorMSP
+        MSPDir: crypto-config/peerOrganizations/investor.example.com/msp
+        AnchorPeers:
+            - Host: peer0.investor.example.com
+              Port: 7051
+
+    # Custodian definition
+    - &Custodian
+        Name: CustodianMSP
+        ID: CustodianMSP
+        MSPDir: crypto-config/peerOrganizations/custodian.example.com/msp
+        AnchorPeers:
+              - Host: peer0.custodian.example.com
+                Port: 7051
+
+    # Exchange definition
+    - &Exchange
+        Name: ExchangeMSP
+        ID: ExchangeMSP
+        MSPDir: crypto-config/peerOrganizations/exchange.example.com/msp
+        AnchorPeers:
+              - Host: peer0.exchange.example.com
+                Port: 7051
+
+    # Bank definition
+    - &Bank
+        Name: BankMSP
+        ID: BankMSP
+        MSPDir: crypto-config/peerOrganizations/bank.example.com/msp
+        AnchorPeers:
+              - Host: peer0.bank.example.com
+                Port: 7051
+
+    # Depository definition 
+    - &Depository
+        Name: DepositoryMSP
+        ID: DepositoryMSP
+        MSPDir: crypto-config/peerOrganizations/depository.example.com/msp
+        AnchorPeers:
+              - Host: peer0.depository.example.com
+                Port: 7051
+
+    # Regulator definition
+    - &Regulator
+        Name: RegulatorMSP
+        ID: ReglatorMSP
+        MSPDir: crypto-config/peerOrganizations/regulator.example.com/msp
+        AnchorPeers:
+              - Host: peer0.regulator.example.com
+                Port: 7051
+################################################################################
+#
+#   SECTION: Orderer
+#
+#   - This section defines the values to encode into a config transaction or
+#   genesis block for orderer related parameters
+#
+################################################################################
+Orderer: &OrdererDefaults
+
+    # Orderer Type: The orderer implementation to start
+    # Available types are "solo" and "kafka"
+    OrdererType: solo
+
+    Addresses:
+        - orderer.example.com:7050
+
+    # Batch Timeout: The amount of time to wait before creating a batch
+    BatchTimeout: 2s
+
+    # Batch Size: Controls the number of messages batched into a block
+    BatchSize:
+
+        # Max Message Count: The maximum number of messages to permit in a batch
+        MaxMessageCount: 10
+
+        # Absolute Max Bytes: The absolute maximum number of bytes allowed for
+        # the serialized messages in a batch.
+        AbsoluteMaxBytes: 99 MB
+
+        # Preferred Max Bytes: The preferred maximum number of bytes allowed for
+        # the serialized messages in a batch. A message larger than the preferred
+        # max bytes will result in a batch larger than preferred max bytes.
+        PreferredMaxBytes: 512 KB
+
+    Kafka:
+        # Brokers: A list of Kafka brokers to which the orderer connects
+        # NOTE: Use IP:port notation
+        Brokers:
+            - 127.0.0.1:9092
+
+    # Organizations is the list of orgs which are defined as participants on
+    # the orderer side of the network
+    Organizations:
+
+################################################################################
+#
+#   SECTION: Application
+#
+#   - This section defines the values to encode into a config transaction or
+#   genesis block for application related parameters
+#
+################################################################################
+Application: &ApplicationDefaults
+
+    # Organizations is the list of orgs which are defined as participants on
+    # the application side of the network
+    Organizations:
