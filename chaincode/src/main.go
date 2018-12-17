@@ -2,16 +2,36 @@ package main
 
 import (
     "fmt"
+    "time"
     "github.com/hyperledger/fabric/core/chaincode/shim"
     pb "github.com/hyperledger/fabric/protos/peer"
 )
 
-const prefixCustodian = "CUSTDN"
-const prefixBank = "BNK"
-//const prefixExchange = "XCHNG"
-//const prefixDepository = "DPSTRY"
+const PREFIX01 = "01" // For investor
+//const PREFIX02 = "02" // For investorPortfolio
+//const PREFIX03 = "03" // For investorTrades
+const PREFIX04 = "04" // For bankMaster
+const PREFIX05 = "05" // For bankTransactions
+//const PREFIX06 = "06" // For exchangeMaster
+//const PREFIX07 = "07" // For exchangeTrades
+
+const PREFIX01IDX = "01IDX" // Index for investor
+//const PREFIX02IDX = "02IDX" // Index for investorPortfolio
+//const PREFIX03IDX = "03IDX" // Index for investorTrades
+const PREFIX04IDX = "04IDX" // Index for bankMaster
+const PREFIX05IDX = "05IDX" // Index for bankTransactions
+//const PREFIX06IDX = "06IDX" // Index for exchangeMaster
+//const PREFIX07IDX = "07IDX" // Index for exchangeTrades
+
+const DEBIT = "DEBIT"
+const CREDIT = "CREDIT"
 
 var logger = shim.NewLogger("main")
+
+func getTimeStamp() string {
+    _time := time.Now()
+    return _time.Format("2006-01-02 15:04:05")
+}
 
 type SmartContract struct {
 }
@@ -22,22 +42,19 @@ var bcFunctions = map[string] func(shim.ChaincodeStubInterface, []string) pb.Res
 
     // CUSTODIAN PEER
     "onboard_investor":       onboardInvestor,
-    //"check_kyc":              checkKYC,
-    //"buy_share":              buyShare,
-    //"sell_share":             sellShare,
-    //"get_investor_dashboard": getInvestorDashboards,
+    //"trade_asset":            tradeAsset,
+    //"get_investor_portfolio": getInvestorDashboards,
+    //"get_investor_trades":    getInvestorTrades,
 
     // BANK PEER
-    "init_bank":             initBank,
-    "execute_transaction": executeTransaction,
+    "get_bank_master":       getBankMaster,
+    "execute_transaction":   executeTransaction,
+    //"get_bank_transactions": getBankTransactions,
 
     // EXCHANGE PEER
-    //"init_exchange": initExchange,
-    //"execute_trade": executeTrade,
-
-    // DEPOSITORY PEER
-    //"init_depository": initDepository,
-    //"record_trade":    recordTrade,
+    //"get_exchange_master": getExchangeMaster,
+    //"execute_trade":       executeTrade,
+    //"get_exchange_trades": getExchangeTrades,
 }
 
 
@@ -46,7 +63,10 @@ func (t *SmartContract) Init(stub shim.ChaincodeStubInterface) pb.Response {
     //_, args := stub.GetFunctionAndParameters()
     fmt.Println("**********************************")
     fmt.Println("----------IN INIT METHOD----------")
-    fmt.Println("**********************************")
+    initBank(stub)
+    //initExchange(stub)
+    fmt.Println("----------OUT INIT METHOD----------")
+    fmt.Println("***********************************")
     return shim.Success(nil)
 }
 
@@ -55,7 +75,6 @@ func (t *SmartContract) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 
     fmt.Println("************************************")
     fmt.Println("----------IN INVOKE METHOD----------")
-    fmt.Println("************************************")
 
     // GET THE FUNCION INVOKED AND ARGS FROM SHIM
     function, args := stub.GetFunctionAndParameters()
@@ -67,6 +86,9 @@ func (t *SmartContract) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
         fmt.Println("ERROR: Function Mapping Not Found")
         return shim.Error("Invalid invoke function.")
     }
+
+    fmt.Println("----------OUT INVOKE METHOD----------")
+    fmt.Println("*************************************")
 
     return bcFunc(stub, args)
 }

@@ -4,7 +4,10 @@
 set -ev
 
 # remove existing main compiled module
-rm main
+mainfile="./main"
+if [ -f "$mainfile" ]; then
+    rm main
+fi
 
 # now build the go modules
 go build main.go data.go invokeCustodian.go invokeBank.go

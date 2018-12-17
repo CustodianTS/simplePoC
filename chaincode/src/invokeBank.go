@@ -5,62 +5,102 @@ import (
     "encoding/json"
     //"strings"
     "strconv"
-    "time"
     "github.com/hyperledger/fabric/core/chaincode/shim"
     pb "github.com/hyperledger/fabric/protos/peer"
 )
 
 // METHOD TO INITIATE RECORDS IN BANK MASTER
-func initBank(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+// USES PREFIX04, PREFIX04IDX FOR COMPOSITE KEY
+func initBank(stub shim.ChaincodeStubInterface) pb.Response {
 
-    fmt.Println("*********************************")
     fmt.Println("---------- IN INIT BANK----------")
 
-    // RETURN ERROR IF ARGS IS NOT 3 IN NUMBER
-    if len(args) != 3 {
+    // INITIALIZE BANK MASTER WITH DATA
+    _bankMaster := [] bankMaster {
+                      bankMaster {UserName: "johndoe01", BankAC: "BANK00001", Balance:100000},
+                      bankMaster {UserName: "johndoe02", BankAC: "BANK00002", Balance:200000},
+                      bankMaster {UserName: "johndoe03", BankAC: "BANK00003", Balance:300000},
+                    }
+    
+    for i := 0; i < len(_bankMaster); i++ {
+
+        // PREPARE THE KEY VALUE PAIR TO PERSIST THE INVESTOR
+        _bankKey, err := stub.CreateCompositeKey(PREFIX04IDX, []string {PREFIX04, _bankMaster[i].UserName})
+        // CHECK FOR ERROR IN CREATING COMPOSITE KEY
+        if err != nil {
+            return shim.Error(err.Error())
+        }
+
+        // MARSHAL THE BANK MASTER RECORD 
+        _bankMasterAsBytes, err := json.Marshal(_bankMaster[i])
+        // CHECK FOR ERROR IN MARSHALING
+        if err != nil {
+            return shim.Error(err.Error())
+        }
+
+        // NOW WRITE THE BANK MASTER RECORD
+        err = stub.PutState(_bankKey, _bankMasterAsBytes)
+        // CHECK FOR ERROR
+        if err != nil {
+            return shim.Error(err.Error())
+        }
+    }
+    fmt.Println("---------- OUT INIT BANK ----------")
+
+    // RETURN SUCCESS
+    return shim.Success(nil)
+}
+
+// METHOD TO GET BANK MASTER RECORD
+// PARAMETERS: 1. USERNAME
+// USES PREFIX04, PREFIX04IDX FOR COMPOSITE KEY
+func getBankMaster(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+
+    fmt.Println("****************************************")
+    fmt.Println("---------- IN GET BANK MASTER ----------")
+
+    // RETURN ERROR IF ARGS IS NOT 1 IN NUMBER
+    if len(args) != 1 {
         fmt.Println("**************************")
-        fmt.Println("Too few argments... Need 3")
+        fmt.Println("Too few argments... Need 1")
         fmt.Println("**************************")
-        return shim.Error("Invalid argument count. Expecting 7.")
+        return shim.Error("Invalid argument count. Expecting 1.")
     }
 
-    // INITIALIZE BANK MASTER WITH USERDATA
-    _balance,_ := strconv.ParseFloat(args[2], 64)
-    _bankMaster := bankMaster {
-                     userName: args[0],
-                     bankAC:   args[1],
-                     balance:  _balance,
-                    }
-    // PREPARE THE KEY VALUE PAIR TO PERSIST THE INVESTOR
-    _bankKey, err := stub.CreateCompositeKey(prefixBank, []string{_bankMaster.userName})
+    // SET ARGUMENTS INTO LOCAL VARIABLES
+    _userName := args[0]
+
+    // LOG THE ARGUMENTS
+    fmt.Println("**** Arguments To Function ****")
+    fmt.Println("User Name       : ", _userName)
+
+    // PREPARE THE KEY TO GET RECORD FROM BANK MASTER
+    _bankKey, err := stub.CreateCompositeKey(PREFIX04IDX, []string{PREFIX04, _userName})
     // CHECK FOR ERROR IN CREATING COMPOSITE KEY
     if err != nil {
         return shim.Error(err.Error())
     }
+    fmt.Println("getBankMaster: Arguments Setting and Prepare Key Completed")
 
-    // MARSHAL THE BANK MASTER RECORD
-    _bankMasterAsBytes, err := json.Marshal(_bankMaster)
-    // CHECK FOR ERROR IN MARSHALING
+    // USE THE KEY TO RETRIEVE BANK MASTER
+    _bankMasterAsBytes, err := stub.GetState(_bankKey)
     if err != nil {
         return shim.Error(err.Error())
     }
+    fmt.Println("getBankMaster: Record Retrieved by GetState")
 
-    // NOW WRITE THE BANK MASTER RECORD
-    err = stub.PutState(_bankKey, _bankMasterAsBytes)
-    // CHECK FOR ERROR
-    if err != nil {
-        return shim.Error(err.Error())
-    }
-
-    fmt.Println("---------- OUT INIT BANK ----------")
-    fmt.Println("***********************************")
+    fmt.Println(_bankMasterAsBytes)
+    fmt.Println("---------- OUT GET BANK MASTER ----------")
+    fmt.Println("*****************************************")
 
     // RETURN SUCCESS
     return shim.Success(_bankMasterAsBytes)
 }
 
 // METHOD TO EXECUTE DEBIT OR CREDIT TRANSACTIONS ON A BANK ACCOUNT
-// PARAMETERS: 1. BANK ACCOUNT, 2. USERNAME, 3. DEBIT OR CREDIT, 4. AMOUNT
+// PARAMETERS: 1. USERNAME 2. BANK ACCOUNT 3. DEBIT OR CREDIT 4. AMOUNT
+// USES PREFIX04, PREFIX04IDX FOR COMPOSITE KEY - BANK MASTER
+// USES PREFIX05, PREFIX05IDX FOR COMPOSITE KEY - BANK TRANSACTIONS
 func executeTransaction(stub shim.ChaincodeStubInterface, args []string) pb.Response {
     fmt.Println("************************************************")
     fmt.Println("---------- IN EXECUTE TRANSACTION BANK----------")
@@ -74,85 +114,96 @@ func executeTransaction(stub shim.ChaincodeStubInterface, args []string) pb.Resp
     }
 
     // SET ARGUMENTS INTO LOCAL VARIABLES
-    _bankAC := args[0]
-    _userName := args[1]
+    _userName := args[0]
+    _bankAC := args[1]
     _transactionType := args[2]
-    _amount, _ := strconv.ParseFloat(args[3], 64)
+    _amount, _ := strconv.ParseFloat(args[4], 64)
 
-    // PREPARE THE KEY TO GET INVESTOR BANK MASTER
-    _bankKey, err := stub.CreateCompositeKey(prefixBank, []string{_userName})
+    // LOG THE ARGUMENTS
+    fmt.Println("**** Arguments To Function ****")
+    fmt.Println("User Name       : ", _userName)
+    fmt.Println("Bank AC         : ", _bankAC)
+    fmt.Println("Transaction Type: ", _transactionType)
+    fmt.Println("Amount          : ", _amount)
+
+    // PREPARE THE KEY TO GET RECORD FROM BANK MASTER
+    _bankKey, err := stub.CreateCompositeKey(PREFIX04IDX, []string{PREFIX04, _userName})
     // CHECK FOR ERROR IN CREATING COMPOSITE KEY
     if err != nil {
         return shim.Error(err.Error())
     }
-    fmt.Println("executeTransaction: set arguments and prepare key completed")
+    fmt.Println("executeTransaction: Arguments Setting and Prepare Key Completed")
 
     // USE THE KEY TO RETRIEVE BANK MASTER
-    _bankMasterAsBytesRead, err := stub.GetState(_bankKey)
+    _bankMasterAsBytes, err := stub.GetState(_bankKey)
     if err != nil {
         return shim.Error(err.Error())
     }
+    fmt.Println("executeTransaction: Record Retrieved by GetState")
+    fmt.Println(_bankMasterAsBytes)
+
     _bankMaster := bankMaster{}
-	  err = json.Unmarshal(_bankMasterAsBytesRead, &_bankMaster)
-	  if err != nil {
-		  return shim.Error(err.Error())
+    err = json.Unmarshal(_bankMasterAsBytes, &_bankMaster)
+	if err != nil {
+	    return shim.Error(err.Error())
     }
-    fmt.Println("executeTransaction: retrieve bank master completed")
 
     // READY TO EXECUTE TRANSACTION
-    _balance := _bankMaster.balance
-    if _transactionType == "DEBIT" {
+    _balance := _bankMaster.Balance
+    if _transactionType == DEBIT {
         if (_balance < _amount) {
-            fmt.Println("Not enought balance")
+            fmt.Println("executeTransaction: Not enought balance ", _balance, " < ", _amount)
             return shim.Error(err.Error())
         }
+        fmt.Println("executeTransaction: Enough balance ", _balance, " > ", _amount)
         _balance = _balance - _amount
-        fmt.Println("executeTransaction: debit completed")
-    } else if _transactionType == "CREDIT" {
+        fmt.Println("executeTransaction: Debit Completed")
+        fmt.Println("executeTransaction: New balance ", _balance)
+    } else if _transactionType == CREDIT {
+        fmt.Println("executeTransaction: Balance ", _balance, " Amount ", _amount)
         _balance = _balance + _amount
-        fmt.Println("executeTransaction: credit completed")
+        fmt.Println("executeTransaction: Credit Completed")
+        fmt.Println("executeTransaction: New balance ", _balance)
     }
 
     // NOW UPDATE BANK MASTER RECORD
-    _bankMasterUpdate := bankMaster {
-                     userName: _userName,
-                     bankAC:   _bankAC,
-                     balance:  _balance,
+    _bankMaster = bankMaster {
+                     UserName: _userName,
+                     BankAC:   _bankAC,
+                     Balance:  _balance,
                     }
 
     // MARSHAL THE BANK MASTER RECORD
-    _bankMasterAsBytesWrite, err := json.Marshal(_bankMasterUpdate)
+    _bankMasterAsBytes, err = json.Marshal(_bankMaster)
     // CHECK FOR ERROR IN MARSHALING
     if err != nil {
         return shim.Error(err.Error())
     }
 
     // NOW WRITE THE BANK MASTER RECORD
-    err = stub.PutState(_bankKey, _bankMasterAsBytesWrite)
+    err = stub.PutState(_bankKey, _bankMasterAsBytes)
     // CHECK FOR ERROR
     if err != nil {
         return shim.Error(err.Error())
     }
-    fmt.Println("executeTransaction: update bank master completed")
+    fmt.Println("executeTransaction: Record Updated By PutState")
 
     // NOW PREPARE BANK TRANSACTION RECORD TO WRITE
-    _currentTime := time.Now()
-    _currentTimeStr := _currentTime.String()
-    _bankTransaction := bankTransaction {
-        transUUID:    _currentTimeStr,
-        userName:     _userName,
-        bankAC:       _bankAC,
-        transDate:    _currentTime,
-        transAmount:  _amount,
-        balance:      _bankMaster.balance,
+    _currentTimeTS := getTimeStamp()
+    _bankTransaction := bankTransactions {
+        TransTimestamp: _currentTimeTS,
+        BankAC:         _bankAC,
+        TransAmount:    _amount,
+        Balance:        _balance,
     }
+
     // PREPARE THE KEY TO WRITE BANK TRANSACTION
-    _bankTransactionKey, err := stub.CreateCompositeKey(prefixBank, []string{_currentTimeStr})
+    _bankTransactionKey, err := stub.CreateCompositeKey(PREFIX05IDX, []string{PREFIX05, _userName})
     // CHECK FOR ERROR IN CREATING COMPOSITE KEY
     if err != nil {
         return shim.Error(err.Error())
     }
-    fmt.Println("executeTransaction: prepare transaction key completed")
+    fmt.Println("executeTransaction: Prepare Transaction Key Completed")
 
     // MARSHAL THE BANK TRANSACTION RECORD
     _bankTransactionAsBytes, err := json.Marshal(_bankTransaction)
@@ -167,7 +218,7 @@ func executeTransaction(stub shim.ChaincodeStubInterface, args []string) pb.Resp
     if err != nil {
         return shim.Error(err.Error())
     }
-    fmt.Println("executeTransaction: writing bank transaction completed")
+    fmt.Println("executeTransaction: Writing Bank Transaction Completed")
 
     fmt.Println("---------- OUT EXECUTE TRANSACTION BANK----------")
     fmt.Println("*************************************************")

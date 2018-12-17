@@ -1,84 +1,65 @@
 package main
 
 import (
-    "time"
 )
 
 // DATA STRUCTURE TO CAPTURE INVESTOR DETAILS BY CUSTODIAN
-// Key consists of custodianPrefix + userName
+// Key consists of 01 + UserName
 type investor struct {
-    userName     string  `json:"user_name"`
-    userFName    string  `json:"user_fname"`
-    userLName    string  `json:"user_lname"`
-    userIdentity string  `json:"user_identity"`
-    kycStatus    string  `json:"kyc_status"`
-    depositoryAC string  `json:"depository_ac"`
-    bankAC       string  `json:"bank_ac"`
+    UserName     string  `json:"user_name"`
+    UserFName    string  `json:"user_fname"`
+    UserLName    string  `json:"user_lname"`
+    DepositoryAC string  `json:"depository_ac"`
+    BankAC       string  `json:"bank_ac"`
 }
 
-// Key consists of custodianPrefix + userName
+// Key consists of 02 + UserName
 type investorPortfolio struct {
-    stockTicker string  `json:"stock_ticker"`
-    stockQty    int32   `json:"stock_qty"`
-    stockPrice  float32 `json:"stock_price"`
-    stockValue  float32 `json:"stock_value"`
+    StockTicker string  `json:"stock_ticker"`
+    StockQty    int64   `json:"stock_qty"`
+    StockPrice  float32 `json:"stock_price"`
+    StockValue  float32 `json:"stock_value"`
 }
 
-// Key consists of custodianPrefix + userName + tradeUUID
-type investorTrade struct {
-    tradeUUID   string    `json:"trade_uuid"`
-    tradeDate   time.Time `json:"trade_date"`
-    tradeType   string    `json:"trade_type"`
-    stockTicker string    `json:"stock_ticker"`
-    stockQty    int32     `json:"stock_qty"`
-    stockPrice  float32   `json:"stock_price"`
-    stockValue  float32   `json:"stock_value"`
+// Key consists of 03 + UserName
+type investorTrades struct {
+    TradeTimeStamp string    `json:trade_timestamp"`
+    TradeType      string    `json:"trade_type"`
+    StockTicker    string    `json:"stock_ticker"`
+    StockQty       int64     `json:"stock_qty"`
+    StockPrice     float32   `json:"stock_price"`
+    StockValue     float32   `json:"stock_value"`
 }
 
 // DATA STRUCTURE TO CAPTURE TRANSACTION DETAILS BY BANK
-// Key consists of bankPrefix + userName
+// Key consists of 04 + UserName
 type bankMaster struct {
-    userName    string    `json:"user_name"`
-    bankAC      string    `json:"bank_ac"`
-    balance     float64   `json:"balance"`
+    UserName    string    `json:"user_name"`
+    BankAC      string    `json:"bank_ac"`
+    Balance     float64   `json:"balance"`
 }
 
-// Key consists of bankPrefix + userName + transUUID
-type bankTransaction struct {
-    transUUID   string    `json:"trans_uuid"`
-    userName    string    `json:"user_name"`
-    bankAC      string    `json:"bank_ac"`
-    transDate   time.Time `json:"trans_date"`
-    transAmount float64   `json:"trans_amount"`
-    balance     float64   `json:"balance"`
+// Key consists of 05 + UserName
+type bankTransactions struct {
+    TransTimestamp string    `json:"trans_timestamp"`
+    BankAC         string    `json:"bank_ac"`
+    TransAmount    float64   `json:"trans_amount"`
+    Balance        float64   `json:"balance"`
 }
 
 // DATA STRUCTURE TO CAPTURE TRADING DETAILS BY EXCHANGE
-// Key consists of exchangePrefix only
+// Key consists of 06 only
 type exchangeMaster struct {
-    stockTicker string    `json:"stock_ticker"`
-    stockQty    int32     `json:"stock_qty"`
-    stockPrice  float32   `json:"stock_price"`
+    StockTicker string    `json:"stock_ticker"`
+    StockQty    int64     `json:"stock_qty"`
+    StockPrice  float32   `json:"stock_price"`
 }
-// Key consists of exchangePrefix + tradeUUID
+// Key consists of 07 only
 type exchangeTrades struct {
-    tradeUUID   string    `json:"trade_uuid"`
-    tradeDate   time.Time `json:"trade_date"`
-    stockTicker string    `json:"stock_ticker"`
-    stockQty    int32     `json:"stock_qty"`
-    stockPrice  float32   `json:"stock_price"`
-    stockValue  float32   `json:"stock_value"`
-}
-
-// DATA STRUCTURE TO CAPTURE TRANSACTION DETAILS BY DEPOSITORY
-// Key consists of depositoryPrefix + userName + transUUID
-type depositoryTransaction struct {
-    transUUID   string    `json:"trans_uuid"`
-    userName    string    `json:"user_name"`
-    depositoryAC string   `json:"depository_ac"`
-    tradeDate   time.Time `json:"trade_date"`
-    stockTicker string    `json:"stock_ticker"`
-    stockQty    int32     `json:"stock_qty"`
-    stockPrice  float32   `json:"stock_price"`
-    stockValue  float32   `json:"stock_value"`
+    UserName       string    `json:"user_name"`
+    TradeTimestamp string    `json:"trade_timestamp"`
+    StockTicker    string    `json:"stock_ticker"`
+    StockQty       int64     `json:"stock_qty"`
+    StockPrice     float64   `json:"stock_price"`
+    StockValue     float64   `json:"stock_value"`
 }

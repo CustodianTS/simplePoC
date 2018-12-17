@@ -4,39 +4,44 @@ import (
     "fmt"
     "encoding/json"
     //"strings"
-    //"time"
     "github.com/hyperledger/fabric/core/chaincode/shim"
     pb "github.com/hyperledger/fabric/protos/peer"
 )
 
-// METHOD TO CREATE INVESTOR
+// METHOD TO ONBOARD AN INVESTOR - CREATE AN INVESTOR RECORD
+// USES PREFIX01, PREFIX01IDX FOR COMPOSITE KEY - FOR INVESTOR
 func onboardInvestor(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
-    fmt.Printf("***************************************\n")
-    fmt.Printf("---------- IN ONBOARDINVESTOR----------\n")
+    fmt.Println("****************************************")
+    fmt.Println("---------- IN ONBOARDINVESTOR ----------")
 
-    // RETURN ERROR IF ARGS IS NOT 7 IN NUMBER
-    if len(args) != 7 {
-        fmt.Printf("**************************\n")
-        fmt.Printf("Too few argments... Need 7\n")
-        fmt.Printf("**************************\n")
+    // RETURN ERROR IF ARGS IS NOT 5 IN NUMBER
+    if len(args) != 5 {
+        fmt.Println("**************************")
+        fmt.Println("Too few argments... Need 5")
+        fmt.Println("**************************")
 
-        return shim.Error("Invalid argument count. Expecting 7.")
+        return shim.Error("Invalid argument count. Expecting 5.")
     }
+    // LOG THE ARGUMENTS
+    fmt.Println("**** Arguments To Function ****")
+    fmt.Println("User Name     : ", args[0])
+    fmt.Println("User FName    : ", args[1])
+    fmt.Println("User LName    : ", args[2])
+    fmt.Println("Depository AC : ", args[3])
+    fmt.Println("Bank AC       : ", args[4])
 
-    // PREPARE THE INPUT VALUES TO WRITE
+    // SET ARGUMENTS INTO LOCAL STRUCTURE
     _investor := investor {
-        userName:     args[0],
-        userFName:    args[1],
-        userLName:    args[2],
-        userIdentity: args[3],
-        kycStatus:    args[4],
-        depositoryAC: args[5],
-        bankAC:       args[6],
+        UserName:     args[0],
+        UserFName:    args[1],
+        UserLName:    args[2],
+        DepositoryAC: args[3],
+        BankAC:       args[4],
     }
 
     // PREPARE THE KEY VALUE PAIR TO PERSIST THE INVESTOR
-    _investorKey, err := stub.CreateCompositeKey(prefixCustodian, []string{_investor.userName})
+    _investorKey, err := stub.CreateCompositeKey(PREFIX01IDX, []string{PREFIX01, _investor.UserName})
     // CHECK FOR ERROR IN CREATING COMPOSITE KEY
     if err != nil {
         return shim.Error(err.Error())
@@ -56,9 +61,9 @@ func onboardInvestor(stub shim.ChaincodeStubInterface, args []string) pb.Respons
         return shim.Error(err.Error())
     }
 
-    fmt.Printf("---------- OUT ONBOARDINVESTOR----------\n")
-    fmt.Printf("****************************************\n")
+    fmt.Println("---------- OUT ONBOARDINVESTOR----------")
+    fmt.Println("****************************************")
 
     // RETURN SUCCESS
-    return shim.Success(nil)
+    return shim.Success(_investorBytes)
 }
