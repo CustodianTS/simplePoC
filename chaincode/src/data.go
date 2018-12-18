@@ -13,7 +13,7 @@ type investor struct {
     BankAC       string  `json:"bank_ac"`
 }
 
-// Key consists of 02 + UserName
+// Key consists of 02 + UserName + StockTicker
 type investorPortfolio struct {
     StockTicker string  `json:"stock_ticker"`
     StockQty    int64   `json:"stock_qty"`
@@ -23,7 +23,7 @@ type investorPortfolio struct {
 
 // Key consists of 03 + UserName
 type investorTrades struct {
-    TradeTimeStamp string    `json:trade_timestamp"`
+    TradeTimestamp string    `json:trade_timestamp"`
     TradeType      string    `json:"trade_type"`
     StockTicker    string    `json:"stock_ticker"`
     StockQty       int64     `json:"stock_qty"`

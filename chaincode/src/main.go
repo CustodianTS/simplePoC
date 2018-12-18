@@ -8,21 +8,23 @@ import (
 )
 
 const PREFIX01 = "01" // For investor
-//const PREFIX02 = "02" // For investorPortfolio
-//const PREFIX03 = "03" // For investorTrades
+const PREFIX02 = "02" // For investorPortfolio
+const PREFIX03 = "03" // For investorTrades
 const PREFIX04 = "04" // For bankMaster
 const PREFIX05 = "05" // For bankTransactions
 const PREFIX06 = "06" // For exchangeMaster
 const PREFIX07 = "07" // For exchangeTrades
 
 const PREFIX01IDX = "01IDX" // Index for investor
-//const PREFIX02IDX = "02IDX" // Index for investorPortfolio
-//const PREFIX03IDX = "03IDX" // Index for investorTrades
+const PREFIX02IDX = "02IDX" // Index for investorPortfolio
+const PREFIX03IDX = "03IDX" // Index for investorTrades
 const PREFIX04IDX = "04IDX" // Index for bankMaster
 const PREFIX05IDX = "05IDX" // Index for bankTransactions
 const PREFIX06IDX = "06IDX" // Index for exchangeMaster
 const PREFIX07IDX = "07IDX" // Index for exchangeTrades
 
+const BUY = "BUY"
+const SELL = "SELL"
 const DEBIT = "DEBIT"
 const CREDIT = "CREDIT"
 
@@ -42,7 +44,7 @@ var bcFunctions = map[string] func(shim.ChaincodeStubInterface, []string) pb.Res
 
     // CUSTODIAN PEER
     "onboard_investor":       onboardInvestor,
-    //"trade_asset":            tradeAsset,
+    "trade_asset":            tradeAsset,
     //"get_investor_portfolio": getInvestorDashboards,
     //"get_investor_trades":    getInvestorTrades,
 
