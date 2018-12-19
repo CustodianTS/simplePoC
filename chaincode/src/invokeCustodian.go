@@ -199,8 +199,10 @@ func buyAsset(stub shim.ChaincodeStubInterface, _userName string, _stockTicker s
     // NOW PREPARE TO WRITE / UPDATE THE INVESTOR PORTFOLIO
     _investorPortfolio.StockQty = _xStockQty
     _investorPortfolio.StockValue = _stockValue
-    fmt.Println("buyAsset: New StockQty: ", _xStockQty)
+    _investorPortfolio.StockPrice = _stockPrice
+    fmt.Println("buyAsset: New StockQty  : ", _xStockQty)
     fmt.Println("buyAsset: New StockValue: ", _stockValue)
+    fmt.Println("buyAsset: StockPrice    : ", _stockPrice)
 
     // MARSHAL THE INVESTOR PORTFOLIO RECORD
     _investorPortfolioAsBytes, err = json.Marshal(_investorPortfolio)
@@ -230,5 +232,74 @@ func sellAsset(stub shim.ChaincodeStubInterface, _userName string, _stockTicker 
 
     fmt.Println("**********************************************")
     fmt.Println("---------- IN SELL ASSET CUSTODIAN ----------")
+
+    // FETCH THE RECORD FROM INVESTOR PORTFOLIO FOR UPDATE
+    // PREPARE THE KEY TO READ INVESTOR PORTFOLIO
+    _investorPortfolioKey, err := stub.CreateCompositeKey(PREFIX02IDX, []string{PREFIX02, _userName, _stockTicker})
+    // CHECK FOR ERROR IN CREATING COMPOSITE KEY
+    if err != nil {
+        return false
+    }
+    fmt.Println("sellAsset: Prepare Investor Trade Key Completed")
+
+    // USE THE KEY TO RETRIEVE INVESTOR PORTOFOLIO FOR THIS STOCK TICKER
+    _investorPortfolioAsBytes, err := stub.GetState(_investorPortfolioKey)
+    // IF THE STOCK TICKER DOES NOT EXIST THEN RETURN ERROR
+    if _investorPortfolioAsBytes == nil {
+        return false
+    }
+
+    // STRUCTURE TO GET THE INVESTOR PORTFOLIO RECORD
+    _investorPortfolio := investorPortfolio {}
+
+    // IF THE STOCK TICKER EXISTS IN PORTFOLIO UPDATE STOCKQTY
+    fmt.Println("sellAsset: Record Retrieved by GetState")
+    fmt.Println(string(_investorPortfolioAsBytes))
+
+    // NOW UNMARSHALL THE INVESTOR PORTFOLIO RECORD
+    err = json.Unmarshal(_investorPortfolioAsBytes, &_investorPortfolio)
+    // CHECK FOR ERROR IN UNMARSHALLING
+    if err != nil {
+        return false
+    }
+
+    // CHECK IF INVESTOR HAS ENOUGH STOCK TO SELL
+    if (_investorPortfolio.StockQty < _stockQty) {
+        fmt.Println("sellAsset: Not Enough Quantity To Sell ", _investorPortfolio.StockQty, " < ", _stockQty)
+        return false
+    }
+
+    // NOW UPDATE THE STOCKQTY AS WE ARE ADDING TO EXISTING PORTFOLIO
+    _stockQty = _investorPortfolio.StockQty - _stockQty
+    
+    // CALCULATE THE NEW STOCK VALUE
+    _stockValue := float64(_stockQty) * _stockPrice
+
+    // NOW PREPARE TO WRITE / UPDATE THE INVESTOR PORTFOLIO
+    _investorPortfolio.StockQty = _stockQty
+    _investorPortfolio.StockValue = _stockValue
+    _investorPortfolio.StockPrice = _stockPrice
+    fmt.Println("sellAsset: New StockQty  : ", _stockQty)
+    fmt.Println("sellAsset: New StockValue: ", _stockValue)
+    fmt.Println("sellAsset: StockPrice    : ", _stockPrice)
+
+    // MARSHAL THE INVESTOR PORTFOLIO RECORD
+    _investorPortfolioAsBytes, err = json.Marshal(_investorPortfolio)
+    // CHECK FOR ERROR IN MARSHALING
+    if err != nil {
+        return false
+    }
+
+    // NOW WRITE THE INVESTOR PORTFOLIO RECORD
+    err = stub.PutState(_investorPortfolioKey, _investorPortfolioAsBytes)
+    // CHECK FOR ERROR
+    if err != nil {
+        return false
+    }
+    fmt.Println("sellAsset: Writing Investor Portfolio Completed")
+
+    fmt.Println("---------- OUT SELL ASSET CUSTODIAN ----------")
+    fmt.Println("*********************************************")
+
     return true
 }
