@@ -9,7 +9,7 @@ import (
 )
 
 // METHOD TO INITIATE RECORDS IN BANK MASTER
-// USES PREFIX04, PREFIX04IDX FOR COMPOSITE KEY
+// USES PREFIX04 + USERNAME FOR COMPOSITE KEY, PREFIX04IDX AS INDEX - BANK MASTER
 func initBank(stub shim.ChaincodeStubInterface) pb.Response {
 
     fmt.Println("---------- IN INIT BANK----------")
@@ -54,7 +54,7 @@ func initBank(stub shim.ChaincodeStubInterface) pb.Response {
 
 // METHOD TO GET BANK MASTER RECORD
 // PARAMETERS: 1. USERNAME
-// USES PREFIX04, PREFIX04IDX FOR COMPOSITE KEY
+// USES PREFIX04 + USERNAME FOR COMPOSITE KEY, PREFIX04IDX AS INDEX - BANK MASTER
 func getBankMaster(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
     fmt.Println("****************************************")
@@ -101,8 +101,8 @@ func getBankMaster(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 
 // METHOD TO EXECUTE DEBIT OR CREDIT TRANSACTIONS ON A BANK ACCOUNT
 // PARAMETERS: 1. USERNAME 2. BANK ACCOUNT 3. DEBIT OR CREDIT 4. AMOUNT
-// USES PREFIX04, PREFIX04IDX FOR COMPOSITE KEY - BANK MASTER
-// USES PREFIX05, PREFIX05IDX FOR COMPOSITE KEY - BANK TRANSACTIONS
+// USES PREFIX04 + USERNAME FOR COMPOSITE KEY, PREFIX04IDX AS INDEX - BANK MASTER
+// USES PREFIX05 + USERNAME FOR COMPOSITE KEY, PREFIX05IDX AS INDEX - BANK TRANSACTIONS
 func executeTransaction(stub shim.ChaincodeStubInterface, args []string) pb.Response {
     fmt.Println("*************************************************")
     fmt.Println("---------- IN EXECUTE TRANSACTION BANK ----------")
@@ -147,8 +147,8 @@ func executeTransaction(stub shim.ChaincodeStubInterface, args []string) pb.Resp
 
     _bankMaster := bankMaster{}
     err = json.Unmarshal(_bankMasterAsBytes, &_bankMaster)
-	if err != nil {
-	    return shim.Error(err.Error())
+    if err != nil {
+        return shim.Error(err.Error())
     }
 
     // READY TO EXECUTE TRANSACTION
@@ -229,4 +229,50 @@ func executeTransaction(stub shim.ChaincodeStubInterface, args []string) pb.Resp
 
     // RETURN SUCCESS
     return shim.Success(_bankTransactionAsBytes)
+}
+
+// METHOD TO GET ALL BANK TRANSACTIONS OF A USER
+// PARAMETERS: USERNAME
+// USES PREFIX05 + USERNAME AS COMPOSITE KEY, PREFIX05IDX AS INDEX - BANK TRANSACTIONS
+func getBankTransactions(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+
+    fmt.Println("**********************************************")
+    fmt.Println("---------- IN GET BANK TRANSACTIONS ----------")
+
+    // RETURN ERROR IF ARGS IS NOT 1 IN NUMBER
+    if len(args) != 1 {
+        fmt.Println("**************************")
+        fmt.Println("Too few argments... Need 1")
+        fmt.Println("**************************")
+        return shim.Error("Invalid argument count. Expecting 1.")
+    }
+
+    // SET ARGUMENTS INTO LOCAL VARIABLES
+    _userName := args[0]
+
+    // LOG THE ARGUMENTS
+    fmt.Println("**** Arguments To Function ****")
+    fmt.Println("User Name       : ", _userName)
+
+    // PREPARE THE KEY TO READ BANK TRANSACTIONS
+    _bankTransactionKey, err := stub.CreateCompositeKey(PREFIX05IDX, []string{PREFIX05, _userName})
+    // CHECK FOR ERROR IN CREATING COMPOSITE KEY
+    if err != nil {
+        return shim.Error(err.Error())
+    }
+    fmt.Println("getBankTransactions: Prepare Transaction Key Completed")
+
+    // USE THE KEY TO RETRIEVE BANK TRANSACTIONS
+    _bankTransactionsAsBytes, err := stub.GetState(_bankTransactionKey)
+    if err != nil {
+        return shim.Error(err.Error())
+    }
+    fmt.Println("getBankTransactions: Record Retrieved by GetState")
+
+    fmt.Println(string(_bankTransactionsAsBytes))
+    fmt.Println("---------- OUT GET BANK TRANSACTIONS ----------")
+    fmt.Println("***********************************************")
+
+    // RETURN SUCCESS
+    return shim.Success(_bankTransactionsAsBytes)
 }

@@ -9,7 +9,7 @@ import (
 )
 
 // METHOD TO ONBOARD AN INVESTOR - CREATE AN INVESTOR RECORD
-// USES PREFIX01, PREFIX01IDX FOR COMPOSITE KEY - FOR INVESTOR
+// USES PREFIX01 + USERNAME FOR COMPOSITE KEY, PREFIX01IDX AS INDEX - INVESTOR
 func onboardInvestor(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
     fmt.Println("****************************************")
@@ -70,8 +70,8 @@ func onboardInvestor(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 
 // METHOD TO TRADE AN ASSET - BUY OR SELL
 // PARAMETERS: 1. USERNAME 2. TRADE TYPE 3. STOCK TICKER 4. STOCK QTY 5. STOCK PRICE
-// USES PREFIX02, PREFIX02IDX FOR COMPOSITE KEY - INVESTOR PORTFOLIO
-// USES PREFIX03, PREFIX03IDX FOR COMPOSITE KEY - INVESTOR TRADES
+// USES PREFIX02 + USERNAME + STOCKTICKER FOR COMPOSITE KEY, PREFIX02IDX AS INDEX - INVESTOR PORTFOLIO
+// USES PREFIX03 + USERNAME FOR COMPOSITE KEY, PREFIX03IDX AS INDEX - INVESTOR TRADES
 func tradeAsset(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
     fmt.Println("**********************************************")
@@ -156,7 +156,7 @@ func tradeAsset(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
 // METHOD TO BUY AN ASSET
 // PARAMETERS: 1. USERNAME 2. STOCK TICKER 3. STOCK QTY 4. STOCK PRICE
-// USES PREFIX02, PREFIX02IDX FOR COMPOSITE KEY - INVESTOR PORTFOLIO
+// USES PREFIX02 + USERNAME + STOCKTICKER FOR COMPOSITE KEY, PREFIX02IDX AS INDEX - INVESTOR PORTFOLIO
 func buyAsset(stub shim.ChaincodeStubInterface, _userName string, _stockTicker string, _stockQty int64, _stockPrice float64) bool {
 
     fmt.Println("**********************************************")
@@ -227,7 +227,7 @@ func buyAsset(stub shim.ChaincodeStubInterface, _userName string, _stockTicker s
 
 // METHOD TO SELL AN ASSET
 // PARAMETERS: 1. USERNAME 2. STOCK TICKER 3. STOCK QTY 4. STOCK PRICE
-// USES PREFIX02, PREFIX02IDX FOR COMPOSITE KEY - INVESTOR PORTFOLIO
+// USES PREFIX02 + USERNAME + STOCKTICKER FOR COMPOSITE KEY, PREFIX02IDX AS INDEX - INVESTOR PORTFOLIO
 func sellAsset(stub shim.ChaincodeStubInterface, _userName string, _stockTicker string, _stockQty int64, _stockPrice float64) bool {
 
     fmt.Println("**********************************************")
@@ -302,4 +302,122 @@ func sellAsset(stub shim.ChaincodeStubInterface, _userName string, _stockTicker 
     fmt.Println("*********************************************")
 
     return true
+}
+
+// METHOD TO GET PORTFOLIO OF AN INVESTOR
+// PARAMETERS: 1. USERNAME 
+// USES PREFIX02 + USERNAME + STOCKTICKER FOR COMPOSITE KEY, PREFIX02IDX AS INDEX - INVESTOR PORTFOLIO
+func getInvestorPortfolio(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+
+    fmt.Println("***********************************************")
+    fmt.Println("---------- IN GET INVESTOR PORTFOLIO ----------")
+
+    // RETURN ERROR IF ARGS IS NOT 1 IN NUMBER
+    if len(args) != 1 {
+        fmt.Println("**************************")
+        fmt.Println("Too few argments... Need 1")
+        fmt.Println("**************************")
+        return shim.Error("Invalid argument count. Expecting 1.")
+    }
+
+    // SET ARGUMENTS INTO LOCAL VARIABLES
+    _userName := args[0]
+
+    // LOG THE ARGUMENTS
+    fmt.Println("**** Arguments To Function ****")
+    fmt.Println("User Name   : ", _userName)
+
+    // GET THE RESULTS ITERATOR FROM PARTIAL KEY ON INVESTOR PORTFOLIO
+    // PARTIAL KEY IS PREFIX02 + USERNAME
+    _iPortfolioIterator, err := stub.GetStateByPartialCompositeKey(PREFIX02IDX, []string{PREFIX02, _userName})
+    // CHECK FOR ERROR
+    if err != nil {
+        return shim.Error(err.Error())
+    }
+    defer _iPortfolioIterator.Close()
+
+    // ARRAY OF INVESTOR PORTFOLIO
+    _investorPortfolio := make([]investorPortfolio, 1)
+    _iPortfolio := investorPortfolio{}
+    _i := 0
+
+    // NOW LOOP THRU THE ITERATOR TO RETRIEVE THE INVESTOR PORTFOLIO RECORDS
+    for _iPortfolioIterator.HasNext() {
+        _iResult, err := _iPortfolioIterator.Next()
+        // CHECK FOR ERROR
+        if err != nil {
+            return shim.Error(err.Error())
+        }
+
+        fmt.Println("getInvestorPortfolio: Retreiving Values")
+        fmt.Println(string(_iResult.Value))
+
+        // NOW UNMARSHALL THE INVESTOR PORTFOLIO OBJECT
+        err = json.Unmarshal(_iResult.Value, &_iPortfolio)
+        // CHECK FOR ERROR
+        if err != nil {
+            return shim.Error(err.Error())
+        }
+        if (_i == 0) {
+            _investorPortfolio[_i] = _iPortfolio
+        } else {
+            _investorPortfolio = append(_investorPortfolio, _iPortfolio)
+        }
+        _i++
+    }
+    _investorPortfolioAsBytes, err := json.Marshal(_investorPortfolio)
+    fmt.Println("getInvestorPortfolio: Get Investor Portfolio Completed")
+    fmt.Println(string(_investorPortfolioAsBytes))
+
+    fmt.Println("************************************************")
+    fmt.Println("---------- OUT GET INVESTOR PORTFOLIO ----------")
+
+    // RETURN SUCCESS
+    return shim.Success(_investorPortfolioAsBytes)
+}
+
+// METHOD TO GET ALL TRADES OF A USER
+// PARAMETERS: USERNAME
+// USES PREFIX03 + USERNAME AS COMPOSITE KEY, PREFIX03IDX AS INDEX - INVESTOR TRADES
+func getInvestorTrades(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+
+    fmt.Println("********************************************")
+    fmt.Println("---------- IN GET INVESTOR TRADES ----------")
+
+    // RETURN ERROR IF ARGS IS NOT 1 IN NUMBER
+    if len(args) != 1 {
+        fmt.Println("**************************")
+        fmt.Println("Too few argments... Need 1")
+        fmt.Println("**************************")
+        return shim.Error("Invalid argument count. Expecting 1.")
+    }
+
+    // SET ARGUMENTS INTO LOCAL VARIABLES
+    _userName := args[0]
+
+    // LOG THE ARGUMENTS
+    fmt.Println("**** Arguments To Function ****")
+    fmt.Println("User Name       : ", _userName)
+
+    // PREPARE THE KEY TO READ INVESTOR TRADES
+    _investorTradeKey, err := stub.CreateCompositeKey(PREFIX03IDX, []string{PREFIX03, _userName})
+    // CHECK FOR ERROR IN CREATING COMPOSITE KEY
+    if err != nil {
+        return shim.Error(err.Error())
+    }
+    fmt.Println("getInvestorTradess: Prepare Transaction Key Completed")
+
+    // USE THE KEY TO RETRIEVE INVESTOR TRADES
+    _investorTradesAsBytes, err := stub.GetState(_investorTradeKey)
+    if err != nil {
+        return shim.Error(err.Error())
+    }
+    fmt.Println("getInvestorTrades: Record Retrieved by GetState")
+
+    fmt.Println(string(_investorTradesAsBytes))
+    fmt.Println("---------- OUT GET GET INVESTOR TRADES ----------")
+    fmt.Println("*************************************************")
+
+    // RETURN SUCCESS
+    return shim.Success(_investorTradesAsBytes)
 }

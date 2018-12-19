@@ -6,7 +6,7 @@
 #set -ev
 
 CHNAME=tradingchannel
-CCNAME=simple01
+CCNAME=simple04
 
 # Test harness - get_bank_master
 #sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/investor.example.com/users/Admin@investor.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.investor.example.com:7051" cli peer chaincode invoke -o orderer.example.com:7050 -C $CHNAME -n $CCNAME -c '{"function":"get_bank_master","Args":["johndoe01"]}'
@@ -34,12 +34,15 @@ CCNAME=simple01
 #sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/investor.example.com/users/Admin@investor.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.investor.example.com:7051" cli peer chaincode invoke -o orderer.example.com:7050 -C $CHNAME -n $CCNAME -c '{"function":"get_exchange_master","Args":["DABUR"]}'
 
 # Test harness - execute_trade
-#sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/investor.example.com/users/Admin@investor.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.investor.example.com:7051" cli peer chaincode invoke -o orderer.example.com:7050 -C $CHNAME -n $CCNAME -c '{"function":"execute_trade","Args":["johndoe01", "AXISBANK","12","618.15"]}'
-#sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/investor.example.com/users/Admin@investor.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.investor.example.com:7051" cli peer chaincode invoke -o orderer.example.com:7050 -C $CHNAME -n $CCNAME -c '{"function":"execute_trade","Args":["johndoe02", "BHEL",    "15","68.10"]}'
-#sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/investor.example.com/users/Admin@investor.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.investor.example.com:7051" cli peer chaincode invoke -o orderer.example.com:7050 -C $CHNAME -n $CCNAME -c '{"function":"execute_trade","Args":["johndoe03", "DABUR",   "18","443.05"]}'
+sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/investor.example.com/users/Admin@investor.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.investor.example.com:7051" cli peer chaincode invoke -o orderer.example.com:7050 -C $CHNAME -n $CCNAME -c '{"function":"execute_trade","Args":["johndoe01", "AXISBANK","12","618.15"]}'
+sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/investor.example.com/users/Admin@investor.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.investor.example.com:7051" cli peer chaincode invoke -o orderer.example.com:7050 -C $CHNAME -n $CCNAME -c '{"function":"execute_trade","Args":["johndoe02", "BHEL",    "15","68.10"]}'
+sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/investor.example.com/users/Admin@investor.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.investor.example.com:7051" cli peer chaincode invoke -o orderer.example.com:7050 -C $CHNAME -n $CCNAME -c '{"function":"execute_trade","Args":["johndoe03", "DABUR",   "18","443.05"]}'
+
+# Test harness - get_exchange_trades
+sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/investor.example.com/users/Admin@investor.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.investor.example.com:7051" cli peer chaincode invoke -o orderer.example.com:7050 -C $CHNAME -n $CCNAME -c '{"function":"get_exchange_trades","Args":[]}'
 
 # Test harness - onboard_investor
-sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/investor.example.com/users/Admin@investor.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.investor.example.com:7051" cli peer chaincode invoke -o orderer.example.com:7050 -C $CHNAME -n $CCNAME -c '{"function":"onboard_investor","Args":["johndoe01","John","Doe","DEPO00001","BANK00001"]}'
+#sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/investor.example.com/users/Admin@investor.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.investor.example.com:7051" cli peer chaincode invoke -o orderer.example.com:7050 -C $CHNAME -n $CCNAME -c '{"function":"onboard_investor","Args":["johndoe01","John","Doe","DEPO00001","BANK00001"]}'
 
 # Test harness - trade_asset - BUY
 #sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/investor.example.com/users/Admin@investor.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.investor.example.com:7051" cli peer chaincode invoke -o orderer.example.com:7050 -C $CHNAME -n $CCNAME -c '{"function":"trade_asset","Args":["johndoe01","BUY","AXISBANK","12","618.15"]}'
@@ -48,4 +51,4 @@ sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPA
 
 # Test harness - trade_asset - SELL
 #sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/investor.example.com/users/Admin@investor.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.investor.example.com:7051" cli peer chaincode invoke -o orderer.example.com:7050 -C $CHNAME -n $CCNAME -c '{"function":"trade_asset","Args":["johndoe01","SELL","AXISBANK","12","618.15"]}'
-sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/investor.example.com/users/Admin@investor.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.investor.example.com:7051" cli peer chaincode invoke -o orderer.example.com:7050 -C $CHNAME -n $CCNAME -c '{"function":"trade_asset","Args":["johndoe01","SELL","DABUR","8","443.05"]}'
+#sudo docker exec -e "CORE_PEER_LOCALMSPID=InvestorMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/investor.example.com/users/Admin@investor.example.com/msp" -e "CORE_PEER_ADDRESS=peer0.investor.example.com:7051" cli peer chaincode invoke -o orderer.example.com:7050 -C $CHNAME -n $CCNAME -c '{"function":"trade_asset","Args":["johndoe01","SELL","DABUR","8","443.05"]}'

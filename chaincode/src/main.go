@@ -38,27 +38,26 @@ func getTimeStamp() string {
 type SmartContract struct {
 }
 
-
 // MAPPING BETWEEN FUNCTION NAMES IN APIs and GO METHODS
 var bcFunctions = map[string] func(shim.ChaincodeStubInterface, []string) pb.Response {
 
-    // CUSTODIAN PEER
-    "onboard_investor":       onboardInvestor,
-    "trade_asset":            tradeAsset,
-    //"get_investor_portfolio": getInvestorDashboards,
-    //"get_investor_trades":    getInvestorTrades,
+    // CUSTODIAN
+    "onboard_investor":       onboardInvestor,       // ONBOARD INVESTOR TO THE SYSTEM
+    "trade_asset":            tradeAsset,            // TRADE - BUY OR SELL AN ASSET
+    "get_investor_portfolio": getInvestorPortfolio,  // GET PORTFOLIO OF A USER
+    "get_investor_trades":    getInvestorTrades,     // GET ALL TRADES OF A USER
 
-    // BANK PEER
-    "get_bank_master":       getBankMaster,
-    "execute_transaction":   executeTransaction,
-    //"get_bank_transactions": getBankTransactions,
+    // BANK
+    "get_bank_master":       getBankMaster,          // GET BANK ACCOUNT DETAILS OF A USER
+    "execute_transaction":   executeTransaction,     // EXECUTE DEBIT OR CREDIT ON A BANK ACCOUNT
+    "get_bank_transactions": getBankTransactions,    // GET ALL BANK TRANSACTIONS OF A USER
 
-    // EXCHANGE PEER
-    "get_exchange_master": getExchangeMaster,
-    "execute_trade":       executeTrade,
-    //"get_exchange_trades": getExchangeTrades,
+    // EXCHANGE
+    "get_exchange_master_all": getExchangeMasterAll, // GET ALL STOCKTICKERS FROM EXCHANGE MASTER
+    "get_exchange_master":     getExchangeMaster,    // GET ONE STOCKTICKER FROM EXCHANGE MASTER
+    "execute_trade":           executeTrade,         // EXECUTE TRADE ON A STOCKTICKER
+    "get_exchange_trades":     getExchangeTrades,    // GET ALL TRADES EXECUTED ON EXCHANGE
 }
-
 
 // INIT CALLBACK REPRESENTING INVOCATION OF CHAINCODE
 func (t *SmartContract) Init(stub shim.ChaincodeStubInterface) pb.Response {

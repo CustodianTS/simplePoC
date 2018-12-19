@@ -7,7 +7,7 @@
 
 SLEEPY=5
 CHNAME=tradingchannel
-CCNAME=simple01
+CCNAME=simple04
 
 # STOP all the containers
 if [ `sudo docker ps | grep "regulator" | wc -l` != 0 ]; then
